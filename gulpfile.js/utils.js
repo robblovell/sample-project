@@ -4,6 +4,9 @@ const spawn = require('child_process').spawn
 
 const DEFAULT_REPO_NAME = 'sample-project' /* TODO: getGitName() */
 const DEFAULT_ORG_NAME =  'robblovell' /* TODO: c6oio */
+const GIT_DEPLOYER_EMAIL = 'robblovell@gmail.com'/* TODO: "github-actions-bot@codezero.io" */
+const GIT_DEPLOYER_USER = 'robblovell'/* TODO: "github-actions-bot" */
+
 const dryRun = () => {
     return process.argv.some(arg => arg === '--dryrun')
 }
@@ -62,10 +65,10 @@ const getGitName = () => {
 }
 
 const setGitUser = () => {
-    process.env.GIT_DEPLOYER_EMAIL = process.env.GIT_DEPLOYER_EMAIL || "github-actions-bot@codezero.io"
-    process.env.GIT_DEPLOYER_USER = process.env.GIT_DEPLOYER_USER || "github-actions-bot"
-    execer(`git config --global user.email "${process.env.GIT_DEPLOYER_USER || "deployer"}"`, dryRun())
-    execer(`git config --global user.name "${process.env.GIT_DEPLOYER_USER || "deployer"}"`, dryRun())
+    process.env.GIT_DEPLOYER_EMAIL = process.env.GIT_DEPLOYER_EMAIL || GIT_DEPLOYER_EMAIL
+    process.env.GIT_DEPLOYER_USER = process.env.GIT_DEPLOYER_USER || GIT_DEPLOYER_USER
+    execer(`git config --global user.email "${process.env.GIT_DEPLOYER_EMAIL}"`, dryRun())
+    execer(`git config --global user.name "${process.env.GIT_DEPLOYER_USER}"`, dryRun())
 }
 
 const tagExists = (tag) => {
