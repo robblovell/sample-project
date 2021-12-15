@@ -2,7 +2,7 @@ const GulpError = require("plugin-error")
 const execSync = require('child_process').execSync
 const spawn = require('child_process').spawn
 
-const DEFAULT_REPO_NAME = 'sample_project' /* TODO: getGitName() */
+const DEFAULT_REPO_NAME = 'sample-project' /* TODO: getGitName() */
 const DEFAULT_ORG_NAME =  'robblovell' /* TODO: c6oio */
 const dryRun = () => {
     return process.argv.some(arg => arg === '--dryrun')
