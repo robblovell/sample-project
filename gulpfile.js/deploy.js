@@ -36,6 +36,7 @@ const deploy = async () => {
             throw new GulpError('deploy', new Error('Error: for --bump, a valid semantic version increment must be given: --patch, --minor or --major.'))
         }
     }
+    await setGitUser()
     fetchTags()
     let tag = args.find(arg => arg.startsWith('--version='))
     if (tag) {
@@ -92,7 +93,6 @@ const deploy = async () => {
             if (lastHash !== process.env.REPO_HASH) {
                 const version = nextVersion(versions, semver)
                 console.log(`Bump Level: \x1b[33m${semver}\x1b[0m Version: \x1b[33m${version}\x1b[0m, Last Version: \x1b[33m${last}\x1b[0m`)
-                await setGitUser()
                 await tagRef(version, hash)
                 await pushTags()
             } else {
