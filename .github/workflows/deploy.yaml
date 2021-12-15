@@ -27,6 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
+          github_token: ${{ secrets.WORKFLOW_TOKEN }}
           fetch-depth: 2
           submodules: false
       # Set the node version
