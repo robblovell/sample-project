@@ -43,7 +43,7 @@ jobs:
       # Deploy to one environment, multiple namespaces
       - name: Deploy to a cluster
         run: |
-          gulp deploy --${{ github.event.inputs.environment }} --${{ github.event.inputs.bump }} --${{ github.event.inputs.hash }} --${{ github.event.inputs.rollback }} --${{ github.event.inputs.version }}
+          gulp deploy ${{ github.event.inputs.environment }} ${{ github.event.inputs.bump }} ${{ github.event.inputs.hash }} ${{ github.event.inputs.rollback }} ${{ github.event.inputs.version }}
         env:
           KUBECONFIG_CERT_AUTH_DATA: ${{ secrets.KUBECONFIG_CERT_AUTH_DATA }}
           KUBECONFIG_SERVER: ${{ secrets.KUBECONFIG_SERVER }}
