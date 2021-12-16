@@ -2,7 +2,7 @@ const GulpError = require('plugin-error')
 const {
     getGitHash,
     codeVersions, previousVersion, getGitHashForTag, lastVersion, nextVersion, setGitUser, tagRef, pushTags,
-    containerTag, setContainerName, tagExists, fetchTags,
+    containerTag, setContainerName, tagExists, fetchTags, containerImageName,
 } = require('./utils')
 const { postDeployTests } = require('./tests')
 const { apply } = require('./apply');
@@ -93,17 +93,17 @@ const parseArguments = async (argv) => {
     if (!hash) {
         hash = tag ? getGitHashForTag(tag) : getGitHash()
     }
-    return { environment, semver, hash }
+    return { environment, semver, hash, given: givenArgs.toString().replaceAll(',',' ') }
 }
 
 const deploy = async () => {
     await setGitUser()
     await fetchTags()
 
-    const { environment, semver, hash } = await parseArguments(process.argv)
+    const { environment, semver, hash, given } = await parseArguments(process.argv)
     setContainerName(hash)
 
-    console.log(`\x1b[35mDeploying org/repo:hash --> \x1b[31m'${containerTag(hash)}'\x1b[35m into environment \x1b[31m'${environment}'\x1b[35m with arguments: \x1b[31m${givenArgs.toString().replaceAll(',',' ')}\x1b[0m `)
+    console.log(`\x1b[35mDeploying org/repo:hash --> \x1b[31m'${containerImageName()}'\x1b[35m into environment \x1b[31m'${environment}'\x1b[35m with arguments: \x1b[31m${given}\x1b[0m `)
 
     // make sure the hash has a container:
     if (!tagExists(containerTag(), hash)) {
