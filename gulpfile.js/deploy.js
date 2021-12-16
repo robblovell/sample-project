@@ -2,7 +2,7 @@ const GulpError = require('plugin-error')
 const {
     getGitHash,
     codeVersions, previousVersion, getGitHashForTag, lastVersion, nextVersion, setGitUser, tagRef, pushTags,
-    containerTag, setContainerName, tagExists, fetchTags, containerImageName,
+    containerTag, setContainerName, tagExists, fetchTags, containerImageName, strictEnvironment,
 } = require('./utils')
 const { postDeployTests } = require('./tests')
 const { apply } = require('./apply');
@@ -21,8 +21,10 @@ const parseEnvironment = (args) => {
     if (!environment) {
         environment = VALID_ENVIRONMENT_ARGS.find(env => args.some(arg => env === arg.substring(2))) || DEFAULT_ENVIRONMENT
     }
-    if (!VALID_ENVIRONMENT_ARGS.some(env => env === environment)) {
-        throw new GulpError('deploy', new Error('Error: argument there must be a valid environment: --development, or --production.'))
+    if (strictEnvironment()) {
+        if (!VALID_ENVIRONMENT_ARGS.some(env => env === environment)) {
+            throw new GulpError('deploy', new Error('Error: argument there must be a valid environment: --development, or --production.'))
+        }
     }
     return environment
 }
@@ -93,6 +95,7 @@ const parseArguments = async (argv) => {
     if (!hash) {
         hash = tag ? getGitHashForTag(tag) : getGitHash()
     }
+
     return { environment, semver, hash, given: givenArgs.toString().replaceAll(',',' ') }
 }
 

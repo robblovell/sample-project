@@ -1,4 +1,5 @@
-const { spawner, getDeploymentName, containerImageName, dryRun, onBuildServer, deleteTag, tagRef, pushTags } = require("./utils")
+const { spawner, getDeploymentName, containerImageName, dryRun, environmentTag, onBuildServer,
+    deleteTag, tagRef, pushTags } = require("./utils")
 const { writeFileSync } = require("fs")
 const GulpError = require("plugin-error")
 
@@ -85,8 +86,9 @@ const apply = async (environment) => {
     } else {
         await apply_kubernetes(environment)
     }
-    await deleteTag(environment)
-    await tagRef(environment, process.env.REPO_HASH)
+    const envTag = environmentTag(environment)
+    await deleteTag(envTag)
+    await tagRef(envTag, process.env.REPO_HASH)
     await pushTags()
 }
 
