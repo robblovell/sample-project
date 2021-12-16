@@ -7,10 +7,10 @@ const {
 const { postDeployTests } = require("./tests")
 const { apply } = require("./apply");
 
-const VALID_ENVIRONMENT_ARGS = ['develop', 'production']
-const DEFAULT_ENVIRONMENT = 'develop'
-const VALID_SEMVER_CHANGE_ARG = ['patch', 'minor', 'major']
+const DEFAULT_ENVIRONMENT = 'development'
+const VALID_ENVIRONMENT_ARGS = [DEFAULT_ENVIRONMENT, 'production']
 const DEFAULT_SEMVER_CHANGE = 'patch'
+const VALID_SEMVER_CHANGE_ARG = [DEFAULT_SEMVER_CHANGE, 'minor', 'major']
 
 const deploy = async () => {
     const args = process.argv.slice(2) // remove first two elements
@@ -24,7 +24,7 @@ const deploy = async () => {
         environment = VALID_ENVIRONMENT_ARGS.find(env => args.some(arg => env === arg.substring(2))) || DEFAULT_ENVIRONMENT
     }
     if (!VALID_ENVIRONMENT_ARGS.some(env => env === environment)) {
-        throw new GulpError('deploy', new Error('Error: argument there must be a valid environment: --develop, or --production.'))
+        throw new GulpError('deploy', new Error('Error: argument there must be a valid environment: --development, or --production.'))
     }
 
     // for production deploy, a semver bump can be given, '--bump=patch' is the default.
