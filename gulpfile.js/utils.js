@@ -8,7 +8,6 @@ const GIT_DEPLOYER_EMAIL = 'robblovell@gmail.com'/* TODO: "github-actions-bot@co
 const GIT_DEPLOYER_USER = 'robblovell'/* TODO: "github-actions-bot" */
 
 const dryRun = () => {
-    console.log('Its a bug!!')
     return process.argv.some(arg => arg === '--dryrun')
 }
 
