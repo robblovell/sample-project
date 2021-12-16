@@ -4,8 +4,8 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to publish, 'production', 'develop', If no parameters other than 'bump' are also given, deploy the most current commit. If production is specified, a new tag version is created."
-        default: "--develop"
+        description: "Environment to publish, 'production', 'development', If no parameters other than 'bump' are also given, deploy the most current commit. If production is specified, a new tag version is created."
+        default: "--development"
         required: true
       bump:
         description: "For production deploy only, create a new semantic version tag for a new deployment: --bump=patch or --patch (Valid values are 'major', 'minor', 'patch', 'premajor', 'preminor', 'prepatch', 'prerelease'. No other parameters are allowed when using this)"
@@ -57,9 +57,9 @@ jobs:
       #          GCLOUD_KEY: ${{ secrets.GCLOUD_DEVELOP_KEY }}
       # Example of deploying to multiple environments.
       #      # DEPLOY
-      #      # Deploy to develop if the environment is develop (default)
-      #      - name: develop deploy
-      #        if: ${{ github.event.inputs.environment == 'develop' }}
+      #      # Deploy to development if the environment is development (default)
+      #      - name: development deploy
+      #        if: ${{ github.event.inputs.environment == 'development' }}
       #        env:
       #          GCLOUD_KEY: $${{ secrets.GCLOUD_DEVELOP_KEY }}
       #        run: gulp deploy --${{ github.event.inputs.environment }}
