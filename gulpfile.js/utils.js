@@ -6,6 +6,9 @@ const DEFAULT_REPO_NAME = process.env.REPO_NAME || 'sample-project' /* TODO: get
 const DEFAULT_ORG_NAME =  process.env.ORG_NAME || 'robblovell' /* TODO: c6oio */
 const GIT_DEPLOYER_EMAIL = 'robblovell@gmail.com'/* TODO: "github-actions-bot@codezero.io" */
 const GIT_DEPLOYER_USER = 'robblovell'/* TODO: "github-actions-bot" */
+const ENVIRONMENT_TAG_FOLDER = 'environment'
+const CONTAINER_TAG_FOLDER = 'container'
+const VERSION_TAG_FOLDER = 'version'
 
 const dryRun = () => {
     return process.argv.some(arg => arg === '--dryrun')
@@ -113,7 +116,7 @@ const deleteTag = (tag) => {
     }
 }
 
-const codeVersions = (tagFilter = (ele) => ele.startsWith('version')) => {
+const codeVersions = (tagFilter = (ele) => ele.startsWith(VERSION_TAG_FOLDER)) => {
     const tagString = execer(`git tag`)
     const tags = tagString.toString().split('\n')
     const uniq = [...new Set(tags)]
@@ -121,10 +124,10 @@ const codeVersions = (tagFilter = (ele) => ele.startsWith('version')) => {
 }
 
 const lastVersion = (versions) => {
-    return versions[versions.length-1] || 'version/0.0.0'
+    return versions[versions.length-1] || `${VERSION_TAG_FOLDER}/0.0.0`
 }
 
-const nextVersion = (versions, level, semverParse = (str) => str.substring(8), tagCompile = ele => 'version/' + ele) => {
+const nextVersion = (versions, level, semverParse = (str) => str.substring(8), tagCompile = ele => `${VERSION_TAG_FOLDER}/` + ele) => {
     const last = lastVersion(versions)
     console.log("last: ", last)
     const digits = semverParse(last)
@@ -161,7 +164,7 @@ const setContainerName = (
 }
 
 const containerTag = (hash = process.env.REPO_HASH , name = process.env.REPO_NAME, org = process.env.DOCKER_ORG) => {
-    return `container/${org}-${name}-${hash}`
+    return `${CONTAINER_TAG_FOLDER}/${org}-${name}-${hash}`
 }
 
 const containerImageName = (which, hash = process.env.REPO_HASH , name = process.env.REPO_NAME, org = process.env.DOCKER_ORG) => {
@@ -172,11 +175,19 @@ const getDeploymentName = (which, name = process.env.REPO_NAME ) => {
     return `${name}${which?`-${which}`:''}`
 }
 
+const strictEnvironment = () => {
+    return process.env.GCLOUD_KEY
+}
+
+const environmentTag = (environment) => {
+    return `${ENVIRONMENT_TAG_FOLDER}/${environment}`
+}
 module.exports = {
     codeVersions,
     containerTag,
     deleteTag,
     dryRun,
+    environmentTag,
     fetchTags,
     getDeploymentName,
     getGitHash,
@@ -191,6 +202,7 @@ module.exports = {
     setContainerName,
     setGitUser,
     spawner,
+    strictEnvironment,
     tagExists,
     tagRef,
 }

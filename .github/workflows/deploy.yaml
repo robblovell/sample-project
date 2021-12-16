@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to publish, 'production', 'development', If no parameters other than 'bump' are also given, deploy the most current commit. If production is specified, a new tag version is created."
+        description: "Environment to publish, like 'production', 'development' or 'release', If no parameters other than 'bump' are also given, deploy the most current commit. If production is specified, a new tag version is created."
         default: "--development"
         required: true
       bump:
