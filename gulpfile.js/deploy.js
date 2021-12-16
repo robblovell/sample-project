@@ -4,17 +4,15 @@ const {
     codeVersions, previousVersion, getGitHashForTag, lastVersion, nextVersion, setGitUser, tagRef, pushTags,
     containerTag, setContainerName, tagExists, fetchTags,
 } = require('./utils')
-const { postDeployTests } = require("./tests")
-const { apply } = require("./apply");
+const { postDeployTests } = require('./tests')
+const { apply } = require('./apply');
 
 const DEFAULT_ENVIRONMENT = 'development'
 const VALID_ENVIRONMENT_ARGS = [DEFAULT_ENVIRONMENT, 'production']
 const DEFAULT_SEMVER_CHANGE = 'patch'
 const VALID_SEMVER_CHANGE_ARG = [DEFAULT_SEMVER_CHANGE, 'minor', 'major']
 
-const deploy = async () => {
-    const args = process.argv.slice(2) // remove first two elements
-
+const parseEnvironment = (args) => {
     // Get the environment to deploy to and the project in google that corresponds to this environment.
     let environment = args.find(arg => arg.startsWith('--environment='))
     if (environment) {
@@ -26,7 +24,10 @@ const deploy = async () => {
     if (!VALID_ENVIRONMENT_ARGS.some(env => env === environment)) {
         throw new GulpError('deploy', new Error('Error: argument there must be a valid environment: --development, or --production.'))
     }
+    return environment
+}
 
+const parseBump = (args) => {
     // for production deploy, a semver bump can be given, '--bump=patch' is the default.
     let semver
     let bump = args.find(arg => arg.startsWith('--bump='))
@@ -36,16 +37,26 @@ const deploy = async () => {
             throw new GulpError('deploy', new Error('Error: for --bump, a valid semantic version increment must be given: --patch, --minor or --major.'))
         }
     }
-    await setGitUser()
-    await fetchTags()
+    return semver
+}
+
+const parseVersion = (args) => {
     let tag = args.find(arg => arg.startsWith('--version='))
     if (tag) {
         tag = `version/${tag.substring(10)}`
     }
+    return tag
+}
+
+const parseRollback = (args) => {
     let numberBack = args.find(arg => arg.startsWith('--rollback='))
     if (numberBack) {
         numberBack = numberBack.substring(11)
     }
+    return numberBack
+}
+
+const parseHash = (args) => {
     let hash = args.find(arg => arg.startsWith('--hash='))
     if (hash) {
         hash = hash.length > 14 ? hash.substring(7).slice(0,7) : hash.substring(7)
@@ -53,31 +64,46 @@ const deploy = async () => {
             throw new GulpError('deploy', new Error('Error: Hash must be 7 or more digits'))
         }
     }
-    const givenArgs = [numberBack?`--rollback=${numberBack}`:undefined, tag, bump, hash? `hash=${hash}`: undefined].filter(Boolean)
-    console.log('given args: ',givenArgs)
+    return hash
+}
+
+const parseArguments = async (argv) => {
+    const args = argv.slice(2) // remove first two elements
+
+    let environment = parseEnvironment(args)
+    let semver = parseBump(args)
+    let tag = parseVersion(args)
+    let numberBack = parseRollback(args)
+    let hash = parseHash(args)
+
+    const givenArgs = [numberBack?`--rollback=${numberBack}`:undefined, tag, semver?`--bump=${semver}` : undefined, hash? `hash=${hash}`: undefined].filter(Boolean)
     if (!givenArgs.length) {
-        if (environment==='production')
-            semver = DEFAULT_SEMVER_CHANGE
-        else
-            semver = 'none'
-        bump = 'bump='+semver
-        givenArgs.push(bump)
+        semver = environment==='production'?DEFAULT_SEMVER_CHANGE:'none'
+        givenArgs.push('bump='+semver)
     }
     if (givenArgs.length !== 1) {
         throw new GulpError('deploy', new Error('Error: Only one parameter, --bump=[patch | minor | major] --rollback=# or --version=#.#.# may be given'))
     }
+
     if (numberBack) {
         const versions = codeVersions()
         tag = previousVersion(versions, numberBack)
         givenArgs.push('to '+tag)
     }
-
     if (!hash) {
         hash = tag ? getGitHashForTag(tag) : getGitHash()
     }
+    return { environment, semver, hash }
+}
+
+const deploy = async () => {
+    await setGitUser()
+    await fetchTags()
+
+    const { environment, semver, hash } = await parseArguments(process.argv)
     setContainerName(hash)
 
-    console.log(`\x1b[35mDeploying org/repo:hash --> \x1b[31m"${containerTag(hash)}"\x1b[35m into environment \x1b[31m"${environment}"\x1b[35m with arguments: \x1b[31m${givenArgs.toString().replaceAll(',',' ')}\x1b[0m `)
+    console.log(`\x1b[35mDeploying org/repo:hash --> \x1b[31m'${containerTag(hash)}'\x1b[35m into environment \x1b[31m'${environment}'\x1b[35m with arguments: \x1b[31m${givenArgs.toString().replaceAll(',',' ')}\x1b[0m `)
 
     // make sure the hash has a container:
     if (!tagExists(containerTag(), hash)) {
