@@ -105,6 +105,7 @@ const deleteTag = (tag) => {
     } catch (error) {
         console.log(`\x1b[35mTag ${tag} is already deleted.\x1b[0m`)
     }
+    
     try {
         execer(`git push origin :refs/tags/${tag}`, dryRun())
     } catch (error) {
