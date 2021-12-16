@@ -1,3 +1,4 @@
+/* eslint-disable  no-undef, no-console */
 const { series } = require('gulp')
 const { postBuildTest } = require('./tests')
 const { spawner } = require('./utils')
@@ -7,7 +8,7 @@ const uninstall = async () => {
         await spawner('yarn clean-all')
     }
     catch (error) {
-        console.log("Warning: ", error)
+        console.log('Warning: ', error)
     }
 }
 
@@ -16,7 +17,7 @@ const clean = async () => {
         await spawner('yarn clean')
     }
     catch (error) {
-        console.log("Warning: ", error)
+        console.log('Warning: ', error)
     }
 }
 
@@ -33,9 +34,9 @@ const develop = async () => {
 }
 
 const build = series(compile, postBuildTest)
-const clean_build = series(clean, install, compile)
+const cleanBuild = series(clean, install, compile)
 const scratchBuild = series(clean, uninstall, install, build, postBuildTest)
 
 module.exports = {
-    build, clean, compile, develop, install, scratchBuild, uninstall, clean_build
+    build, clean, compile, develop, install, scratchBuild, uninstall, cleanBuild
 }

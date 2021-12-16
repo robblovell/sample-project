@@ -1,3 +1,4 @@
+/* eslint-disable  no-undef, no-console */
 const { series, parallel } = require('gulp')
 const { onBuildServer, spawner } = require('./utils')
 
@@ -31,7 +32,7 @@ const postBuildTest = series(parallelTests1, parallelTests2)
 
 // Container Tests
 const postContainerizeTests = async () => {
-    console.log("No post-container tests")
+    console.log('No post-container tests')
 }
 
 // Deploy Tests

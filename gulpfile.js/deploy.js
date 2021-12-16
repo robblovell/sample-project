@@ -1,3 +1,4 @@
+/* eslint-disable  no-undef, no-console */
 const GulpError = require('plugin-error')
 const {
     getGitHash,
@@ -5,7 +6,7 @@ const {
     containerTag, setContainerName, tagExists, fetchTags, containerImageName, strictEnvironment,
 } = require('./utils')
 const { postDeployTests } = require('./tests')
-const { apply } = require('./apply');
+const { apply } = require('./apply')
 
 const DEFAULT_ENVIRONMENT = 'development'
 const VALID_ENVIRONMENT_ARGS = [DEFAULT_ENVIRONMENT, 'production']
@@ -31,8 +32,8 @@ const parseEnvironment = (args) => {
 
 const parseBump = (args) => {
     // for production deploy, a semver bump can be given, '--bump=patch' is the default.
-    let semver
-    let bump = args.find(arg => arg.startsWith('--bump='))
+    let semver = undefined
+    const bump = args.find(arg => arg.startsWith('--bump='))
     if (bump) {
         semver = bump.substring(7)
         if (!VALID_SEMVER_CHANGE_ARG.some(sem => sem === semver)) {
@@ -72,10 +73,10 @@ const parseHash = (args) => {
 const parseArguments = async (argv) => {
     const args = argv.slice(2) // remove first two elements
 
-    let environment = parseEnvironment(args)
+    const environment = parseEnvironment(args)
     let semver = parseBump(args)
     let tag = parseVersion(args)
-    let numberBack = parseRollback(args)
+    const numberBack = parseRollback(args)
     let hash = parseHash(args)
 
     const givenArgs = [numberBack?`--rollback=${numberBack}`:undefined, tag, semver?`--bump=${semver}` : undefined, hash? `hash=${hash}`: undefined].filter(Boolean)
@@ -128,7 +129,7 @@ const deploy = async () => {
                 console.log(`\x1b[35mA tag for hash ${process.env.REPO_HASH} already exists (${last}), skipping creating and tagging of a new version\x1b[0m`)
             }
         } else { // if this is a non-production deploy
-            console.log(`\x1b[35mSemantic versions are only assigned to production deployments, no version tags have been generated.\x1b[0m`)
+            console.log('\x1b[35mSemantic versions are only assigned to production deployments, no version tags have been generated.\x1b[0m')
         }
     }
     await postDeployTests()

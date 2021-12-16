@@ -1,11 +1,12 @@
-const GulpError = require("plugin-error")
+/* eslint-disable  no-undef, no-console, no-empty */
+const GulpError = require('plugin-error')
 const execSync = require('child_process').execSync
 const spawn = require('child_process').spawn
 
 const DEFAULT_REPO_NAME = process.env.REPO_NAME || 'sample-project' /* TODO: getGitName() */
 const DEFAULT_ORG_NAME =  process.env.ORG_NAME || 'robblovell' /* TODO: c6oio */
-const GIT_DEPLOYER_EMAIL = 'robblovell@gmail.com'/* TODO: "github-actions-bot@codezero.io" */
-const GIT_DEPLOYER_USER = 'robblovell'/* TODO: "github-actions-bot" */
+const GIT_DEPLOYER_EMAIL = 'robblovell@gmail.com'/* TODO: 'github-actions-bot@codezero.io' */
+const GIT_DEPLOYER_USER = 'robblovell'/* TODO: 'github-actions-bot' */
 const ENVIRONMENT_TAG_FOLDER = 'environment'
 const CONTAINER_TAG_FOLDER = 'container'
 const VERSION_TAG_FOLDER = 'version'
@@ -35,8 +36,8 @@ const spawner = async (commandString, noThrow = false, hide = false) => {
                     console.log(`\x1b[35mSafely ignoring error in ${command} ${argsString}\x1b[0m`)
                     resolve(new Error(result))
                 } else {
-                    throw new GulpError(`run command`,
-                        new Error(`\x1b[31m\x1b[40m"${command} ${argsString}" failed, see output of command above.\x1b[0m`))
+                    throw new GulpError('run command',
+                        new Error(`\x1b[31m\x1b[40m'${command} ${argsString}' failed, see output of command above.\x1b[0m`))
                 }
             }
             resolve(result)
@@ -70,21 +71,24 @@ const getGitName = () => {
 const setGitUser = () => {
     process.env.GIT_DEPLOYER_EMAIL = process.env.GIT_DEPLOYER_EMAIL || GIT_DEPLOYER_EMAIL
     process.env.GIT_DEPLOYER_USER = process.env.GIT_DEPLOYER_USER || GIT_DEPLOYER_USER
-    execer(`git config --global user.email "${process.env.GIT_DEPLOYER_EMAIL}"`, dryRun())
-    execer(`git config --global user.name "${process.env.GIT_DEPLOYER_USER}"`, dryRun())
+    execer(`git config --global user.email '${process.env.GIT_DEPLOYER_EMAIL}'`, dryRun())
+    execer(`git config --global user.name '${process.env.GIT_DEPLOYER_USER}'`, dryRun())
 }
 
 const tagExists = (tag) => {
     try {
-        return execer(`git rev-parse -q --verify "refs/tags/${tag}"`)
-    } catch {}
+        return execer(`git rev-parse -q --verify 'refs/tags/${tag}'`)
+    } catch (error) {}
 }
 const getGitHashForTag = (tag) => {
     try {
         if (tagExists(tag)) {
-            return execer(`git rev-list -n 1 ${tag}`)?.toString().slice(0, 7)
+            const result = execer(`git rev-list -n 1 ${tag}`)
+            if (result) {
+                return result.toString().slice(0, 7)
+            }
         }
-    } catch {}
+    } catch (error) {}
 }
 
 const tagRef = (version, commit) => {
@@ -92,14 +96,14 @@ const tagRef = (version, commit) => {
         console.log(`\x1b[35mTag ${version} already exists, skipping creating of tag\x1b[0m`)
         return
     }
-    return execer(`git tag -a ${version} ${commit} -m "${version}"`, dryRun())
+    return execer(`git tag -a ${version} ${commit} -m '${version}'`, dryRun())
 }
 
 const fetchTags = async () => {
     return execer('git fetch --all --tags --force', dryRun())
 }
 const pushTags = async () => {
-    return execer(`git push origin --tags`, dryRun())
+    return execer('git push origin --tags', dryRun())
 }
 
 const deleteTag = (tag) => {
@@ -117,7 +121,7 @@ const deleteTag = (tag) => {
 }
 
 const codeVersions = (tagFilter = (ele) => ele.startsWith(VERSION_TAG_FOLDER)) => {
-    const tagString = execer(`git tag`)
+    const tagString = execer('git tag')
     const tags = tagString.toString().split('\n')
     const uniq = [...new Set(tags)]
     return uniq.filter(tagFilter)
@@ -129,9 +133,9 @@ const lastVersion = (versions) => {
 
 const nextVersion = (versions, level, semverParse = (str) => str.substring(8), tagCompile = ele => `${VERSION_TAG_FOLDER}/` + ele) => {
     const last = lastVersion(versions)
-    console.log("last: ", last)
+    console.log('last: ', last)
     const digits = semverParse(last)
-    console.log("digets: ", last)
+    console.log('digets: ', last)
     const semver = digits.split('.')
     switch(level) {
         case 'major': semver[0] = (Number(semver[0]) + 1).toString(); semver[1] = '0'; semver[2] = '0';break
@@ -139,7 +143,7 @@ const nextVersion = (versions, level, semverParse = (str) => str.substring(8), t
         case 'patch': semver[2] = (Number(semver[2]) + 1).toString(); break
     }
     const version = tagCompile(semver.join('.')).toString()
-    console.log("version", version)
+    console.log('version', version)
     return version
 }
 
@@ -155,12 +159,9 @@ const setContainerName = (
     hash = getGitHash(),
     name = DEFAULT_REPO_NAME,
     org = DEFAULT_ORG_NAME) => {
-    console.log('set container name: ',hash,name,org)
-    console.log('set container name: ',process.env.REPO_HASH,process.env.REPO_NAME,process.env.DOCKER_ORG)
     process.env.REPO_HASH = hash
     process.env.REPO_NAME = name
     process.env.DOCKER_ORG = org
-    console.log('set container name: ',process.env.REPO_HASH,process.env.REPO_NAME,process.env.DOCKER_ORG)
 }
 
 const containerTag = (hash = process.env.REPO_HASH , name = process.env.REPO_NAME, org = process.env.DOCKER_ORG) => {
@@ -169,6 +170,10 @@ const containerTag = (hash = process.env.REPO_HASH , name = process.env.REPO_NAM
 
 const containerImageName = (which, hash = process.env.REPO_HASH , name = process.env.REPO_NAME, org = process.env.DOCKER_ORG) => {
     return `${org}/${name}${which?`-${which}`:''}:${hash}`
+}
+
+const containerImageNameForAPI = (which, hash = process.env.REPO_HASH , name = process.env.REPO_NAME, org = process.env.DOCKER_ORG) => {
+    return { image: `${org}/${name}${which?`-${which}`:''}`, tag: `${hash}` }
 }
 
 const getDeploymentName = (which, name = process.env.REPO_NAME ) => {
@@ -182,9 +187,11 @@ const strictEnvironment = () => {
 const environmentTag = (environment) => {
     return `${ENVIRONMENT_TAG_FOLDER}/${environment}`
 }
+
 module.exports = {
     codeVersions,
     containerTag,
+    containerImageNameForAPI,
     deleteTag,
     dryRun,
     environmentTag,

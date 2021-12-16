@@ -1,5 +1,6 @@
+/* eslint-disable  no-undef, no-console */
 const { series } = require('gulp')
-const { spawner, setContainerName, tagRef, containerTag, setGitUser, pushTags } = require('./utils')
+const { containerImageNameForAPI, spawner, setContainerName, tagRef, containerTag, setGitUser, pushTags } = require('./utils')
 
 const container = async () => {
     setContainerName()
@@ -14,8 +15,14 @@ const publish = async () => {
     await pushTags()
 }
 
+const deleteContainer = async (which) => {
+    const { image, tag } = containerImageNameForAPI(which)
+    await spawner(`curl "https://${process.env.DOCKER_HUB_USER}:${process.env.DOCKER_HUB_TOKEN}` +
+        `@hub.docker.com/v2/repositories/${image}/tags/${tag}/" -X DELETE`)
+}
+
 const containerize = series(container, publish)
 
 module.exports = {
-    container, containerize, publish
+    container, containerize, deleteContainer, publish
 }

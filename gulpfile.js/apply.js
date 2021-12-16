@@ -1,7 +1,8 @@
+/* eslint-disable  no-undef, no-console */
 const { spawner, getDeploymentName, containerImageName, dryRun, environmentTag, onBuildServer,
-    deleteTag, tagRef, pushTags } = require("./utils")
-const { writeFileSync } = require("fs")
-const GulpError = require("plugin-error")
+    deleteTag, tagRef, pushTags } = require('./utils')
+const { writeFileSync } = require('fs')
+const GulpError = require('plugin-error')
 
 const ZONE = process.env.ORGANIZATION_ZONE || 'us-central1-c'
 const PROJECT_LOOKUP = {
@@ -25,15 +26,15 @@ const setImages = async (environment, kubectlArgs) => {
     }
 }
 
-const apply_gcloud = async (environment) => {
+const applyGcloud = async (environment) => {
     console.log('Applying to gcloud')
     const project = PROJECT_LOOKUP[environment]
     if (dryRun())
-        console.log(`\x1b[1m\x1b[35mThis is a dry run\x1b[0m`)
+        console.log('\x1b[1m\x1b[35mThis is a dry run\x1b[0m')
     // base64 decode the GCLOUD KEY = require(the environment variable set in the CICD job runner.
-    let data = `${process.env.GCLOUD_KEY}`
-    let buff = Buffer.from(data, 'base64')
-    let text = buff.toString('ascii')
+    const data = `${process.env.GCLOUD_KEY}`
+    const buff = Buffer.from(data, 'base64')
+    const text = buff.toString('ascii')
     const keyFile = process.env.GCLOUD_KEY_FILE || `${process.env.HOME}/gcloud.json`
     // write the key to the home directory's gcloud.json file.
     writeFileSync(keyFile, text)
@@ -44,7 +45,7 @@ const apply_gcloud = async (environment) => {
     await setImages(environment, '')
 }
 
-const apply_kubernetes = async (environment) => {
+const applyKubernetes = async (environment) => {
     console.log('Applying using kubeconfig')
     let kubectlArgs
     if (onBuildServer()) {
@@ -64,8 +65,8 @@ const apply_kubernetes = async (environment) => {
 // Provider specific and repo specific steps
 const apply = async (environment) => {
     if (dryRun())
-        console.log(`\x1b[1m\x1b[35mThis is a dry run\x1b[0m`)
-    console.log(`\x1b[1m\x1b[33mApplying kubernetes resources\x1b[0m`)
+        console.log('\x1b[1m\x1b[35mThis is a dry run\x1b[0m')
+    console.log('\x1b[1m\x1b[33mApplying kubernetes resources\x1b[0m')
 
     // Authentication
     if (onBuildServer()) {
@@ -82,9 +83,9 @@ const apply = async (environment) => {
         }
     }
     if (process.env.GCLOUD_KEY) {
-        await apply_gcloud(environment)
+        await applyGcloud(environment)
     } else {
-        await apply_kubernetes(environment)
+        await applyKubernetes(environment)
     }
     const envTag = environmentTag(environment)
     await deleteTag(envTag)
