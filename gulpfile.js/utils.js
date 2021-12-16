@@ -2,8 +2,8 @@ const GulpError = require("plugin-error")
 const execSync = require('child_process').execSync
 const spawn = require('child_process').spawn
 
-const DEFAULT_REPO_NAME = 'sample-project' /* TODO: getGitName() */
-const DEFAULT_ORG_NAME =  'robblovell' /* TODO: c6oio */
+const DEFAULT_REPO_NAME = process.env.REPO_NAME || 'sample-project' /* TODO: getGitName() */
+const DEFAULT_ORG_NAME =  process.env.ORG_NAME || 'robblovell' /* TODO: c6oio */
 const GIT_DEPLOYER_EMAIL = 'robblovell@gmail.com'/* TODO: "github-actions-bot@codezero.io" */
 const GIT_DEPLOYER_USER = 'robblovell'/* TODO: "github-actions-bot" */
 
@@ -152,9 +152,12 @@ const setContainerName = (
     hash = getGitHash(),
     name = DEFAULT_REPO_NAME,
     org = DEFAULT_ORG_NAME) => {
-    process.env.REPO_HASH = process.env.REPO_HASH || hash
-    process.env.REPO_NAME = process.env.REPO_NAME || name
-    process.env.DOCKER_ORG = process.env.DOCKER_ORG || org
+    console.log('set container name: ',hash,name,org)
+    console.log('set container name: ',process.env.REPO_HASH,process.env.REPO_NAME,process.env.DOCKER_ORG)
+    process.env.REPO_HASH = hash
+    process.env.REPO_NAME = name
+    process.env.DOCKER_ORG = org
+    console.log('set container name: ',process.env.REPO_HASH,process.env.REPO_NAME,process.env.DOCKER_ORG)
 }
 
 const containerTag = (hash = process.env.REPO_HASH , name = process.env.REPO_NAME, org = process.env.DOCKER_ORG) => {
@@ -162,11 +165,11 @@ const containerTag = (hash = process.env.REPO_HASH , name = process.env.REPO_NAM
 }
 
 const containerImageName = (which, hash = process.env.REPO_HASH , name = process.env.REPO_NAME, org = process.env.DOCKER_ORG) => {
-    return `${org}/${name}-${which}:${hash}`
+    return `${org}/${name}${which?`-${which}`:''}:${hash}`
 }
 
 const getDeploymentName = (which, name = process.env.REPO_NAME ) => {
-    return `${name}-${which}`
+    return `${name}${which?`-${which}`:''}`
 }
 
 module.exports = {
