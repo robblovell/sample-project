@@ -37,7 +37,7 @@ const deploy = async () => {
         }
     }
     await setGitUser()
-    fetchTags()
+    await fetchTags()
     let tag = args.find(arg => arg.startsWith('--version='))
     if (tag) {
         tag = `version/${tag.substring(10)}`
