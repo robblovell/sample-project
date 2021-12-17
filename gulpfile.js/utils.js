@@ -180,8 +180,12 @@ const getDeploymentName = (which, name = process.env.REPO_NAME ) => {
     return `${name}${which?`-${which}`:''}`
 }
 
-const strictEnvironment = () => {
+const deployToGoogle = () => {
     return process.env.GCLOUD_KEY
+}
+
+const strictEnvironment = () => {
+    return deployToGoogle()
 }
 
 const environmentTag = (environment) => {
@@ -193,6 +197,7 @@ module.exports = {
     containerTag,
     containerImageNameForAPI,
     deleteTag,
+    deployToGoogle,
     dryRun,
     environmentTag,
     fetchTags,

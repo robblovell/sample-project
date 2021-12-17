@@ -8,21 +8,21 @@ const container = async () => {
     await spawner('docker-compose build')
 }
 
-const publish = async () => {
+const containerPublish = async () => {
     await spawner('docker-compose push')
     await setGitUser()
     tagRef(containerTag(), process.env.REPO_HASH)
     await pushTags()
 }
 
-const deleteContainer = async (which) => {
+const containerDelete = async (which) => {
     const { image, tag } = containerImageNameForAPI(which)
     await spawner(`curl "https://${process.env.DOCKER_HUB_USER}:${process.env.DOCKER_HUB_TOKEN}` +
         `@hub.docker.com/v2/repositories/${image}/tags/${tag}/" -X DELETE`)
 }
 
-const containerize = series(container, publish)
+const containerize = series(containerBuild, containerCompose, containerPublish)
 
 module.exports = {
-    container, containerize, deleteContainer, publish
+    container, containerize, containerBuild, containerCompose, containerDelete, containerPublish
 }

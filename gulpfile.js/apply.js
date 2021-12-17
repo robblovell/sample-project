@@ -1,6 +1,7 @@
 /* eslint-disable  no-undef, no-console */
 const { spawner, getDeploymentName, containerImageName, dryRun, environmentTag, onBuildServer,
-    deleteTag, tagRef, pushTags } = require('./utils')
+    deleteTag, tagRef, pushTags, deployToGoogle
+} = require('./utils')
 const { writeFileSync } = require('fs')
 const GulpError = require('plugin-error')
 
@@ -82,7 +83,7 @@ const apply = async (environment) => {
             throw new GulpError('apply', new Error('Error: If deploying with a kubeconfig file, the KUBECONFIG environment variable must be set to a valid kubeconfig.yaml file, or a GCLOUD_KEY should be set.'))
         }
     }
-    if (process.env.GCLOUD_KEY) {
+    if (deployToGoogle()) {
         await applyGcloud(environment)
     } else {
         await applyKubernetes(environment)
